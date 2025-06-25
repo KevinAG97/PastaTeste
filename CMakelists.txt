@@ -1,0 +1,155 @@
+cmake_minimum_required(VERSION 3.10)
+project(PGCCHIB)
+
+# --- Configurações gerais de C++ ---
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-Wno-pragmas)
+
+# --- Dependências via FetchContent ---
+include(FetchContent)
+
+FetchContent_Declare(glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG 3.4
+)
+FetchContent_Declare(glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG master
+)
+FetchContent_Declare(stb_image
+  GIT_REPOSITORY https://github.com/nothings/stb.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(glfw glm stb_image)
+
+# --- Include directories ---
+include_directories(
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/common
+  ${CMAKE_SOURCE_DIR}/common/M5-6
+  ${CMAKE_SOURCE_DIR}/include/glad
+  ${glm_SOURCE_DIR}
+  ${stb_image_SOURCE_DIR}
+)
+
+# --- OpenGL libs ---
+if(WIN32)
+    set(OPENGL_LIBS opengl32)
+elseif(APPLE)
+    find_library(OpenGL_LIBRARY OpenGL)
+    set(OPENGL_LIBS ${OpenGL_LIBRARY})
+else()
+    find_package(OpenGL REQUIRED)
+    set(OPENGL_LIBS ${OPENGL_gl_LIBRARY})
+endif()
+
+# --- GLAD C source ---
+set(GLAD_C_FILE "${CMAKE_SOURCE_DIR}/common/glad.c")
+if(NOT EXISTS ${GLAD_C_FILE})
+    message(FATAL_ERROR
+      "Arquivo glad.c não encontrado!\n"
+      "Baixe a GLAD em https://glad.dav1d.de/ e coloque:\n"
+      "  - glad.h em include/glad/\n"
+      "  - glad.c em common/"
+    )
+endif()
+
+# --- Executáveis de exemplos/exercícios (exceto M6) ---
+set(EXERCISES
+    ExemplosMoodle/M1_material/exemplo_00
+    ExemplosMoodle/M1_material/exemplo_01
+    ExemplosMoodle/M2_material/exemplo_02
+    ExemplosMoodle/M3_material/exemplo_03
+    ExemplosMoodle/M4_material/exemplo_04
+    HelloTriangle
+    HelloTransform
+    HelloTexture
+    HelloSprite
+    HelloAnimatedSprite
+    HelloIsometricTilemap
+    Modulo2/Ex1Parte1M2
+    Modulo2/Ex1Parte2M2
+    Modulo3/M3JogoCores
+)
+
+foreach(EXERCISE ${EXERCISES})
+    get_filename_component(EXE_NAME ${EXERCISE} NAME)
+    add_executable(${EXE_NAME}
+        src/${EXERCISE}.cpp
+        ${GLAD_C_FILE}
+    )
+    target_link_libraries(${EXE_NAME}
+        PRIVATE glfw ${OPENGL_LIBS} glm::glm
+    )
+endforeach()
+
+# --- Desafio Módulo 5 (Sprite Controller) ---
+set(M5_SRC_DIR "${CMAKE_SOURCE_DIR}/src/RespostaDesafioModulo5")
+file(GLOB M5_SOURCES "${M5_SRC_DIR}/*.cpp")
+
+add_executable(RespostaDesafioModulo5
+    ${M5_SOURCES}
+    ${GLAD_C_FILE}
+)
+# Nota: A linkagem e os includes são herdados do include_directories() global
+target_link_libraries(RespostaDesafioModulo5
+    PRIVATE
+    glfw
+    ${OPENGL_LIBS}
+    glm::glm
+)
+add_custom_command(TARGET RespostaDesafioModulo5 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${M5_SRC_DIR}/Vampires3.png" $<TARGET_FILE_DIR:RespostaDesafioModulo5>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${M5_SRC_DIR}/_sprites_vs.glsl" $<TARGET_FILE_DIR:RespostaDesafioModulo5>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${M5_SRC_DIR}/_sprites_fs.glsl" $<TARGET_FILE_DIR:RespostaDesafioModulo5>
+    COMMENT "Copiando recursos para RespostaDesafioModulo5"
+)
+
+
+# --- Atividade Vivencial 6 (Tilemap Isométrico) ---
+file(GLOB M6_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/*.cpp"
+)
+
+add_executable(AtividadeVivencialM6
+    ${M6_SOURCES}
+    ${GLAD_C_FILE}
+)
+
+target_include_directories(AtividadeVivencialM6
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/common
+    ${glm_SOURCE_DIR}
+    ${stb_image_SOURCE_DIR}
+)
+
+target_link_libraries(AtividadeVivencialM6
+    PRIVATE
+    glfw
+    ${OPENGL_LIBS}
+    glm::glm
+)
+
+# --- Copiar recursos para o diretório de build ---
+add_custom_command(TARGET AtividadeVivencialM6 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/terrain1.tmap"
+        $<TARGET_FILE_DIR:AtividadeVivencialM6>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/terrain.png"
+        $<TARGET_FILE_DIR:AtividadeVivencialM6>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/player.png"
+        $<TARGET_FILE_DIR:AtividadeVivencialM6>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/_geral_vs.glsl"
+        $<TARGET_FILE_DIR:AtividadeVivencialM6>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/AtividadeVivencial6/_geral_fs.glsl"
+        $<TARGET_FILE_DIR:AtividadeVivencialM6>
+)
