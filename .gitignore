@@ -16,7 +16,7 @@
 *.so
 
 # Ignorar dependências baixadas automaticamente pelo CMake (GLFW FetchContent)
-_build/
+# _build/
 _deps/
 glfw-src/
 glfw-build/
