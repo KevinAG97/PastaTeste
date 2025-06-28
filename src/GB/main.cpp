@@ -1,6 +1,6 @@
 // src/main.cpp
 
-#include <glad/glad.h>      // <-- ESTA LINHA É A SOLUÇÃO. ELA PRECISA VIR ANTES DA GLFW.
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Game.h"
