@@ -1,9 +1,9 @@
 #include "CharacterController.h"
 
-#define ANIM_SOUTH 3 
-#define ANIM_EAST  1 
+#define ANIM_SOUTH 0 
+#define ANIM_EAST  2 
 #define ANIM_WEST  0 
-#define ANIM_NORTH 2 
+#define ANIM_NORTH 1 
 
 CharacterController::CharacterController(const char* filename, int nAnimations, int nFrames)
     : Sprite(filename, nAnimations, nFrames) {
