@@ -39,8 +39,6 @@ void Player::processInput(GLFWwindow* window, float dt, const Tilemap& map) {
             startPos = gridPosition;
             targetPos = potentialTarget;
             
-            // ########## LÓGICA DE ANIMAÇÃO CORRIGIDA ##########
-            // Com base na análise do seu spritesheet, invertemos a lógica para esquerda/direita.
             if (moveDir.x > 0) {          // Se move para a direita (tecla 'D')...
                 animDirection = ANIM_LEFT_WALK;  // ...usa a animação que está na linha 2.
             } else if (moveDir.x < 0) {   // Se move para a esquerda (tecla 'A')...
@@ -50,7 +48,6 @@ void Player::processInput(GLFWwindow* window, float dt, const Tilemap& map) {
             } else if (moveDir.y < 0) {   // Se move para cima (tecla 'W')...
                 animDirection = ANIM_UP;         // ...usa a animação da linha 0.
             }
-            // ######################################################
         }
     }
 }

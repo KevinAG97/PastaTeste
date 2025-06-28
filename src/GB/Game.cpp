@@ -43,16 +43,13 @@ void Game::update(float dt) {
     // Se o jogador estiver na lava (tileLavaID), GAME OVER.
     if (tileToCheck == Map->tileLavaID) {
         this->State = GAME_OVER;
-        // Opcional: teletransportar o jogador de volta à última posição válida
-        // ThePlayer->gridPosition = ThePlayer->lastValidPosition; 
         std::cout << "GAME OVER! Voce caiu na lava." << std::endl;
-        return; // Retorna para parar qualquer outra lógica de update
+        return;
     }
     
     // Se o jogador está tentando se mover para um tile de água (tileAguaID),
     // o movimento deve ser impedido. Isso é tratado em Player::processInput
     // ao verificar a função isPositionWalkable do Tilemap.
-    // O que precisamos garantir aqui é que a agua não cause Game Over.
 
     int objectIndex = Map->getObjectAt(ThePlayer->gridPosition);
     if (objectIndex != -1) {

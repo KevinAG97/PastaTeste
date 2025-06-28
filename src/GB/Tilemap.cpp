@@ -79,17 +79,15 @@ void Tilemap::draw(Renderer &renderer) {
             glm::vec2 uvOffset = { tileGridX * uv_tile_w, tileGridY * uv_tile_h };
             glm::vec2 uvScale = { uv_tile_w, uv_tile_h };
             
-            // A chamada para desenhar volta a ser a original, que desenha um quadrado
             renderer.draw(this->tilesheetTexture, screenPos, glm::vec2(this->tileWidth, this->tileHeight), 0.0f, glm::vec3(1.0f), 1.0f, uvOffset, uvScale);
         }
     }
     for (const auto& obj : objects) {
         glm::vec2 screenPos = getScreenPos(obj.pos, 0.25f);
-        renderer.draw(this->objectTexture, screenPos, glm::vec2(this->tileWidth * 1.75f, this->tileHeight * 1.75f));
+        renderer.draw(this->objectTexture, screenPos, glm::vec2(this->tileWidth * 1.05f, this->tileHeight * 1.05f));
     }
 }
 
-// ESTA É A FUNÇÃO CORRIGIDA PARA O ÂNGULO
 glm::vec2 Tilemap::getScreenPos(glm::ivec2 gridPos, float heightOffset) const {
     float originX = 1280.0f / 2.0f;
     float originY = 200.0f;
@@ -123,13 +121,10 @@ bool Tilemap::isPositionWalkable(glm::ivec2 pos) const {
         return false;
     }
 
-    // Se o tile for a lava, é caminhável.
-    // Isso é para permitir que o jogador entre na lava e ative o GAME_OVER.
-    if (tileID == tileLavaID) { // Adicionada esta verificação
-        return true; // É caminhável
+    if (tileID == tileLavaID) {
+        return true;
     }
 
-    // Para todos os outros tiles, mantém a lógica original de verificar walkableTiles.
     return walkableTiles.count(tileID) > 0;
 }
 int Tilemap::getTileAt(glm::ivec2 pos) const {

@@ -7,16 +7,12 @@
 #include "Renderer.h"
 #include "Tilemap.h"
 
-// ##### ENUM CORRIGIDA E MAIS DESCRITIVA #####
-// A ordem agora corresponde exatamente às linhas do seu spritesheet (sully.png)
-// Linha 0: Cima, Linha 1: Direita, Linha 2: Esquerda, Linha 3: Baixo
 enum PlayerAnim {
-    ANIM_UP = 2,
-    ANIM_RIGHT_WALK = 3,
-    ANIM_LEFT_WALK = 0,
-    ANIM_DOWN = 1
+    ANIM_UP = 3,
+    ANIM_RIGHT_WALK = 1,
+    ANIM_LEFT_WALK = 2,
+    ANIM_DOWN = 0
 };
-// #############################################
 
 class Player {
 public:
