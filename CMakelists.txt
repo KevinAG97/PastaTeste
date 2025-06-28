@@ -1,96 +1,72 @@
-cmake_minimum_required(VERSION 3.10)
-project(PGCCHIB)
+cmake_minimum_required(VERSION 3.11)
+project(TrabalhoGB_Isometrico)
 
-# Define o padrão do C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Ativa o FetchContent
+# --- Gestão de Dependências com FetchContent ---
 include(FetchContent)
-
-# Configura o FetchContent para baixar e compilar GLFW automaticamente
 FetchContent_Declare(
   glfw
   GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG 3.4  # Define a versão desejada da GLFW
+  GIT_TAG 3.3.8
 )
-
-# Configura o FetchContent para baixar a GLM automaticamente
 FetchContent_Declare(
   glm
   GIT_REPOSITORY https://github.com/g-truc/glm.git
-  GIT_TAG master  # Define a versão desejada da GLM
+  GIT_TAG master
 )
-
-# Faz o download e compila as bibliotecas
-FetchContent_MakeAvailable(glfw glm)
-
-# Configura o FetchContent para baixar a stb_image automaticamente
+# Adicionamos a declaração do STB que estava em falta na tua versão antiga
 FetchContent_Declare(
-  stb_image
+  stb
   GIT_REPOSITORY https://github.com/nothings/stb.git
   GIT_TAG master
 )
+FetchContent_MakeAvailable(glfw glm stb) # E disponibilizamos o stb
 
-FetchContent_MakeAvailable(stb_image)
-
-# Adiciona as pastas de cabeçalhos
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/common)
-include_directories(${CMAKE_SOURCE_DIR}/common/M5-6)
-include_directories(${CMAKE_SOURCE_DIR}/include/glad)
-include_directories(${glm_SOURCE_DIR})
-
-
-# Lista de exemplos/exercícios podem ser colocados aqui também
-set(EXERCISES
-    ExemplosMoodle/M1_material/exemplo_00
-    ExemplosMoodle/M1_material/exemplo_01
-    ExemplosMoodle/M2_material/exemplo_02
-    ExemplosMoodle/M3_material/exemplo_03
-    ExemplosMoodle/M4_material/exemplo_04
-    HelloTriangle
-    HelloTransform
-    HelloTexture
-    HelloSprite
-    HelloAnimatedSprite
-    HelloIsometricTilemap
-    Modulo2/Ex1Parte1M2
-    Modulo2/Ex1Parte2M2
-    Modulo3/M3JogoCores
+# --- Lista de Ficheiros-Fonte ---
+file(GLOB GAME_SOURCES "src/GB/*.cpp")
+set(SOURCES
+    ${GAME_SOURCES}
+    "Common/glad.c"
+    # O stb_impl.cpp já é apanhado pelo GLOB, por isso não precisa de estar aqui
 )
 
-add_compile_options(-Wno-pragmas)
+# --- Criação do Executável ---
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Define as bibliotecas para cada sistema operacional
+# --- Diretórios de Inclusão ---
+# Adicionamos o caminho para os ficheiros .h do stb
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "src/GB"
+    "include"
+    ${glm_SOURCE_DIR}
+    ${stb_SOURCE_DIR} # <--- CORREÇÃO FINAL AQUI
+)
+
+# --- Ligação das Bibliotecas ---
 if(WIN32)
     set(OPENGL_LIBS opengl32)
 elseif(APPLE)
     find_library(OpenGL_LIBRARY OpenGL)
     set(OPENGL_LIBS ${OpenGL_LIBRARY})
 else()
-    find_package(OpenGL REQUIRED)
-    set(OPENGL_LIBS ${OPENGL_gl_LIBRARY})
+    set(OPENGL_LIBS OpenGL::GL)
 endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw ${OPENGL_LIBS} glm)
 
-# Caminho esperado para a GLAD
-set(GLAD_C_FILE "${CMAKE_SOURCE_DIR}/common/glad.c")
-
-# Verifica se os arquivos da GLAD estão no lugar
-if (NOT EXISTS ${GLAD_C_FILE})
-    message(FATAL_ERROR "Arquivo glad.c não encontrado! Baixe a GLAD manualmente em https://glad.dav1d.de/ e coloque glad.h em include/glad/ e glad.c em common/")
-endif()
-
-# Cria os executáveis
-foreach(EXERCISE ${EXERCISES})
-    # Extrai o nome do arquivo sem o diretório para o executável
-    get_filename_component(EXE_NAME ${EXERCISE} NAME)                                                                                                                                       
-    
-    # Adiciona o executável usando o nome do arquivo como nome do executável
-    add_executable(${EXE_NAME} src/${EXERCISE}.cpp ${GLAD_C_FILE}) 
-
-    # Configura as bibliotecas e include dirs para o executável
-    target_include_directories(${EXE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/glad ${glm_SOURCE_DIR} ${stb_image_SOURCE_DIR})
-    target_link_libraries(${EXE_NAME} glfw ${OPENGL_LIBS} glm::glm)
-endforeach()
-
+# --- Cópia dos Recurso (Assets) ---
+file(GLOB ASSET_FILES
+    "src/GB/map.txt"
+    "src/GB/*.png"
+    "src/GB/*.jpg"
+    "src/GB/*.vert"
+    "src/GB/*.frag"
+)
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${ASSET_FILES}
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copiando ficheiros de recurso para a pasta de build..."
+)

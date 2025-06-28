@@ -1,5 +1,5 @@
 # Ignorar a pasta de build e arquivos temporários do CMake
-/build/
+# /build/
 /CMakeCache.txt
 /CMakeFiles/
 /Makefile
@@ -16,7 +16,7 @@
 *.so
 
 # Ignorar dependências baixadas automaticamente pelo CMake (GLFW FetchContent)
-_build/
+# _build/
 _deps/
 glfw-src/
 glfw-build/
