@@ -21,6 +21,7 @@ void Game::init() {
     ThePlayer = std::make_unique<Player>(Map->playerStartPos);
     ThePlayer->loadTexture("sully.png", 4, 4);
 }
+
 void Game::processInput(float dt) {
     if (this->State == GAME_ACTIVE) {
         ThePlayer->processInput(this->Window, dt, *Map);
@@ -30,18 +31,29 @@ void Game::processInput(float dt) {
 void Game::update(float dt) {
     if (this->State != GAME_ACTIVE) return;
     ThePlayer->update(dt, *Map);
+
     int tileToCheck = -1;
+    // Pega o tile para onde o jogador está se movendo ou onde ele está parado
     if (ThePlayer->isMoving()) {
         tileToCheck = Map->getTileAt(ThePlayer->getTargetPosition());
     } else {
         tileToCheck = Map->getTileAt(ThePlayer->gridPosition);
     }
-    if (tileToCheck == Map->tileLavaID || (Map->tileAguaID != -1 && tileToCheck == Map->tileAguaID)) {
+
+    // Se o jogador estiver na lava (tileLavaID), GAME OVER.
+    if (tileToCheck == Map->tileLavaID) {
         this->State = GAME_OVER;
-        ThePlayer->gridPosition = ThePlayer->lastValidPosition;
-        std::cout << "GAME OVER! Voce caiu na agua." << std::endl;
-        return;
+        // Opcional: teletransportar o jogador de volta à última posição válida
+        // ThePlayer->gridPosition = ThePlayer->lastValidPosition; 
+        std::cout << "GAME OVER! Voce caiu na lava." << std::endl;
+        return; // Retorna para parar qualquer outra lógica de update
     }
+    
+    // Se o jogador está tentando se mover para um tile de água (tileAguaID),
+    // o movimento deve ser impedido. Isso é tratado em Player::processInput
+    // ao verificar a função isPositionWalkable do Tilemap.
+    // O que precisamos garantir aqui é que a agua não cause Game Over.
+
     int objectIndex = Map->getObjectAt(ThePlayer->gridPosition);
     if (objectIndex != -1) {
         Map->removeObject(objectIndex);

@@ -117,6 +117,19 @@ glm::vec2 Tilemap::getScreenPos(glm::ivec2 gridPos, float heightOffset) const {
 bool Tilemap::isPositionWalkable(glm::ivec2 pos) const {
     if (pos.x < 0 || pos.x >= mapWidth || pos.y < 0 || pos.y >= mapHeight || mapData.empty()) return false;
     int tileID = mapData.at(pos.y * mapWidth + pos.x);
+
+    // Se o tile for a água, não é caminhável.
+    if (tileID == tileAguaID) {
+        return false;
+    }
+
+    // Se o tile for a lava, é caminhável.
+    // Isso é para permitir que o jogador entre na lava e ative o GAME_OVER.
+    if (tileID == tileLavaID) { // Adicionada esta verificação
+        return true; // É caminhável
+    }
+
+    // Para todos os outros tiles, mantém a lógica original de verificar walkableTiles.
     return walkableTiles.count(tileID) > 0;
 }
 int Tilemap::getTileAt(glm::ivec2 pos) const {
